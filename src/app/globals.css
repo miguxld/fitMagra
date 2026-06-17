@@ -354,18 +354,43 @@ html[data-theme="light"] ::selection {
 /* ═══════════════════════════════════════════════
    MOBILE-FIRST RESPONSIVE OVERRIDES
    ═══════════════════════════════════════════════ */
+
+/* Base touch targets */
+button, a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+@media (max-width: 768px) {
+  /* Tighter section padding on mobile */
+  #hero, #globe-sec, #about, #stats, #contact, #pricing, #payment {
+    padding-left: 1.25rem !important;
+    padding-right: 1.25rem !important;
+  }
+  #method {
+    margin-left: 0.5rem !important;
+    margin-right: 0.5rem !important;
+    padding-left: 1.25rem !important;
+    padding-right: 1.25rem !important;
+  }
+  /* Pricing section – no min-height for stacked layout */
+  #pricing .pricing-stack {
+    min-height: unset !important;
+  }
+}
+
 @media (max-width: 480px) {
   #hero {
     padding-left: 1rem !important;
     padding-right: 1rem !important;
+    padding-top: 7rem !important;
   }
   #globe-sec, #about, #stats, #contact {
     padding-left: 1rem !important;
     padding-right: 1rem !important;
   }
-  #method, #payment {
-    margin-left: 0.5rem !important;
-    margin-right: 0.5rem !important;
+  #method, #payment, #pricing {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
     padding-left: 1rem !important;
     padding-right: 1rem !important;
   }
@@ -373,6 +398,20 @@ html[data-theme="light"] ::selection {
 
 @media (max-width: 360px) {
   h1 {
-    font-size: 2.1rem !important;
+    font-size: 2rem !important;
   }
+  h2 {
+    font-size: 1.6rem !important;
+  }
+}
+
+/* Swipe hint micro-animation */
+@keyframes swipeHint {
+  0%, 100% { transform: translateX(0); opacity: 0.5; }
+  40% { transform: translateX(-8px); opacity: 1; }
+  60% { transform: translateX(8px); opacity: 1; }
+}
+
+.swipe-hint {
+  animation: swipeHint 2.4s ease-in-out 1.5s 2;
 }
