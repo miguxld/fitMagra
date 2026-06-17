@@ -6,15 +6,20 @@ import { cn } from "@/lib/utils";
 interface RevealProps {
   children: React.ReactNode;
   className?: string;
-  delay?: 1 | 2 | 3 | 4;
+  delay?: number;
 }
 
 export default function Reveal({ children, className, delay }: RevealProps) {
   const ref = useScrollReveal();
+  
+  // Apply delay as inline style if provided
+  const style = delay ? { transitionDelay: `${delay}ms` } : undefined;
+
   return (
     <div
       ref={ref}
-      className={cn("reveal", delay && `reveal-delay-${delay}`, className)}
+      className={cn("reveal", className)}
+      style={style}
     >
       {children}
     </div>
