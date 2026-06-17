@@ -1,104 +1,112 @@
 "use client";
 
 import { useScrollReveal } from "@/app/hooks/useScrollReveal";
-import { credentials, timeline } from "@/app/lib/data";
+import { getCredentials, getTimeline, type Lang } from "@/app/lib/data";
+import Reveal from "./Reveal";
 
 interface AboutProps {
   t: (key: string) => string;
+  lang: Lang;
 }
 
-export default function About({ t }: AboutProps) {
-  const imgRef = useScrollReveal();
-  const textRef = useScrollReveal();
+export default function About({ t, lang }: AboutProps) {
+  const headRef = useScrollReveal();
+  const credentials = getCredentials(lang);
+  const timeline = getTimeline(lang);
 
   return (
-    <section id="about" className="py-20 md:py-24 px-5 md:px-10 lg:px-20 max-w-[calc(1240px+160px)] mx-auto">
-      <div className="grid grid-cols-1 lg:grid-cols-[0.85fr_1fr] gap-10 lg:gap-16 items-start">
-        <div ref={imgRef} className="reveal lg:sticky lg:top-24">
-          <div className="rounded-[var(--radius-lg)] overflow-hidden aspect-[3/4] bg-[var(--color-surface)]">
-            <img
-              src="/img/coach-pilates.jpg"
-              alt="Mauricio Sánchez · Coach FitMagra"
-              className="w-full h-full object-cover object-top block"
-            />
-          </div>
-          <div className="mt-4 text-[0.7rem] text-[var(--color-text-muted)] tracking-wider flex justify-between items-center">
-            <span>Mauricio Sánchez · CEO FitMagra</span>
-            <a
-              href="https://www.linkedin.com/in/mauriciofitmagra/"
-              target="_blank"
-              className="text-[var(--color-text-primary)] no-underline border-b border-[var(--color-card-border)] hover:text-[var(--color-accent)] hover:border-[var(--color-accent)] transition-colors"
-            >
-              LinkedIn →
-            </a>
-          </div>
-        </div>
+    <section id="about" className="py-20 md:py-28 px-5 md:px-10 lg:px-20 bg-[var(--color-bg)]">
+      <div className="max-w-[1200px] mx-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.1fr] gap-12 lg:gap-20 items-center">
+          {/* Image col */}
+          <div className="relative">
+            {/* Ambient glow */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full max-w-[400px] rounded-full bg-gradient-to-tr from-[var(--color-accent-dim)] to-transparent blur-3xl opacity-50" />
+            
+            <Reveal className="relative z-10 mx-auto max-w-[460px] aspect-[4/5] rounded-[2rem] overflow-hidden border border-[var(--color-card-border)] bg-[var(--color-surface)]">
+              <img
+                src="/img/mau.jpeg"
+                alt="Mauricio Sánchez"
+                className="w-full h-full object-cover object-top filter contrast-[1.05]"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-[var(--color-bg)] via-transparent to-transparent opacity-80" />
+              <div className="absolute bottom-6 left-6 right-6">
+                <div className="font-display text-[2.2rem] font-medium leading-none text-[var(--color-text-primary)] mb-1">
+                  Mauricio Sánchez
+                </div>
+                <div className="text-[0.75rem] uppercase tracking-widest text-[var(--color-accent)] font-semibold">
+                  Founder & Head Coach
+                </div>
+              </div>
+            </Reveal>
 
-        <div ref={textRef} className="reveal reveal-delay-1">
-          <div className="inline-flex items-center gap-2 text-[0.65rem] tracking-[0.22em] uppercase text-[var(--color-text-muted)] mb-3">
-            <span className="w-[18px] h-[1px] bg-[var(--color-accent)] inline-block" />
-            {t("about.label")}
+            {/* Floating badge */}
+            <div className="absolute -right-4 top-1/4 hidden md:flex items-center gap-3 bg-[var(--color-surface)] border border-[var(--color-card-border)] p-3 rounded-2xl shadow-[var(--shadow-elevation)] animate-float">
+              <div className="w-10 h-10 rounded-full bg-[var(--color-accent-dim)] flex items-center justify-center text-[var(--color-accent)] font-bold text-[0.8rem]">
+                14
+              </div>
+              <div className="text-[0.65rem] font-semibold text-[var(--color-text-secondary)] uppercase tracking-wide leading-tight">
+                {lang === "es" ? "Países" : "Countries"}<br />{lang === "es" ? "activos" : "active"}
+              </div>
+            </div>
           </div>
-          <h2
-            className="font-[family-name:var(--font-display)] text-[clamp(2rem,4.2vw,3.3rem)] font-bold leading-[1.05] tracking-tight mb-5"
-            dangerouslySetInnerHTML={{ __html: t("about.title") }}
-          />
-          <div className="w-12 h-0.5 bg-[var(--color-accent)] rounded-full mb-8" />
 
-          <p className="text-[0.95rem] leading-[1.75] text-[var(--color-text-secondary)] mb-4">
-            Soy <strong className="text-[var(--color-text-primary)] font-medium">Mauricio Sánchez</strong>, Magíster en Actividad Física y Salud por la Universidad del Rosario, entrenador certificado y creador de <strong className="text-[var(--color-text-primary)] font-medium">FitMagra Systems</strong> — un método que simula un equipo multidisciplinario real: fisiólogo, dietista clínico y bioquímico, todo en un solo protocolo.
-          </p>
-          <p className="text-[0.95rem] leading-[1.75] text-[var(--color-text-secondary)] mb-4">
-            He asesorado a <strong className="text-[var(--color-text-primary)] font-medium">+450 personas en 14 países</strong> — desde clientes post-operatorios hasta médicos preparando OceanMan. Cada caso recibe el mismo rigor: ecuaciones científicas reales, evidencia Oxford CEBM y ajuste clínico semanal.
-          </p>
+          {/* Text col */}
+          <div>
+            <div ref={headRef} className="reveal mb-8">
+              <div className="section-label mb-4">{t("about.label")}</div>
+              <h2
+                className="font-display text-[clamp(2.2rem,4vw,3.6rem)] font-medium leading-[1.05] tracking-tight mb-6"
+                dangerouslySetInnerHTML={{ __html: t("about.title") }}
+              />
+              <div className="space-y-4 text-[0.95rem] leading-relaxed text-[var(--color-text-secondary)]">
+                <p>
+                  {lang === "es"
+                    ? "Durante años, la industria del fitness ha vendido rutinas genéricas que ignoran cómo funciona realmente el cuerpo humano. Empecé FitMagra Systems para cambiar eso."
+                    : "For years, the fitness industry has sold generic routines that ignore how the human body really works. I started FitMagra Systems to change that."}
+                </p>
+                <p>
+                  {lang === "es"
+                    ? "Mi enfoque no se basa en lo que 'creo' que funciona, sino en lo que la evidencia científica (Oxford CEBM) y 4 ecuaciones metabólicas dictan para tu fisiología única."
+                    : "My approach is not based on what I 'think' works, but on what scientific evidence (Oxford CEBM) and 4 metabolic equations dictate for your unique physiology."}
+                </p>
+              </div>
+            </div>
 
-          {/* Credentials */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-8">
-            {credentials.map((cred, i) => (
-              <div
-                key={i}
-                className="relative border border-[var(--color-card-border)] rounded-[var(--radius-md)] p-5 bg-[var(--color-surface)] transition-all hover:border-[var(--color-accent)] hover:-translate-y-0.5 overflow-hidden group"
-              >
-                {cred.logo && (
-                  <div className="w-12 h-12 rounded-[10px] overflow-hidden bg-[var(--color-surface-2)] mb-3">
-                    <img
-                      src={cred.logo}
-                      alt={cred.inst}
-                      className="w-full h-full object-contain p-1"
-                    />
+            {/* Credentials Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-10">
+              {credentials.map((c, i) => (
+                <Reveal key={i} delay={i * 100}>
+                  <div className="bg-[var(--color-surface)] border border-[var(--color-card-border)] p-4 rounded-2xl h-full transition-all hover:border-[var(--color-accent)] hover:shadow-[var(--shadow-accent-sm)]">
+                    <div className="text-[0.65rem] uppercase tracking-widest text-[var(--color-accent)] font-semibold mb-1">
+                      {c.inst}
+                    </div>
+                    <div className="text-[0.85rem] font-medium text-[var(--color-text-primary)] leading-tight mb-2">
+                      {c.title}
+                    </div>
+                    <div className="text-[0.7rem] text-[var(--color-text-muted)]">
+                      {c.meta}
+                    </div>
                   </div>
-                )}
-                <div className="text-[0.6rem] tracking-[0.15em] uppercase text-[var(--color-accent)] font-medium mb-1">
-                  {cred.inst}
-                </div>
-                <div className="text-[0.86rem] font-medium text-[var(--color-text-primary)] leading-snug mb-1">
-                  {cred.title}
-                </div>
-                <div className="text-[0.7rem] text-[var(--color-text-muted)]">
-                  {cred.meta}
-                </div>
-                <div className="absolute inset-0 bg-gradient-to-br from-transparent via-[var(--color-accent)]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
-              </div>
-            ))}
-          </div>
+                </Reveal>
+              ))}
+            </div>
 
-          {/* Timeline */}
-          <div className="mt-10 relative">
-            <div className="absolute left-[7px] top-2 bottom-2 w-px bg-[var(--color-card-border)]" />
-            {timeline.map((item, i) => (
-              <div key={i} className="relative pl-8 pb-6 last:pb-0">
-                <div className="absolute left-[3px] top-1.5 w-[9px] h-[9px] rounded-full bg-[var(--color-bg)] border-2 border-[var(--color-accent)] z-10" />
-                <div className="font-mono text-[0.7rem] text-[var(--color-accent)] tracking-wider mb-1">
-                  {item.year}
-                </div>
-                <div className="text-[0.88rem] font-medium text-[var(--color-text-primary)] mb-1">
-                  {item.title}
-                </div>
-                <div className="text-[0.78rem] text-[var(--color-text-secondary)] leading-relaxed">
-                  {item.desc}
-                </div>
+            {/* Timeline mini */}
+            <Reveal>
+              <div className="border-l border-[var(--color-card-border)] ml-2 pl-6 py-2 space-y-6 relative">
+                {timeline.slice(-3).map((item, i) => (
+                  <div key={i} className="relative">
+                    <div className="absolute -left-[29px] top-1 w-2.5 h-2.5 rounded-full bg-[var(--color-accent)] shadow-[0_0_8px_var(--color-accent)]" />
+                    <div className="text-[0.7rem] text-[var(--color-accent)] font-bold mb-0.5">{item.year}</div>
+                    <div className="text-[0.8rem] font-medium text-[var(--color-text-primary)] mb-1">{item.title}</div>
+                    <div className="text-[0.75rem] text-[var(--color-text-muted)] leading-snug max-w-[400px]">
+                      {item.desc}
+                    </div>
+                  </div>
+                ))}
               </div>
-            ))}
+            </Reveal>
           </div>
         </div>
       </div>

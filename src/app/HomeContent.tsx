@@ -29,16 +29,16 @@ export default function HomeContent() {
       <MusicPlayer />
       <Navbar lang={lang} setLang={setLang} t={t} theme={theme} toggleTheme={toggleTheme} />
       <main>
-        <Hero t={t} />
+        <Hero t={t} lang={lang} />
         <Marquee lang={lang} />
         <Globe lang={lang} />
-        <Stats t={t} />
-        <About t={t} />
-        <Method t={t} />
-        <Transforms t={t} />
-        <Testimonials t={t} />
-        <Pricing t={t} />
-        <Payment t={t} />
+        <Stats t={t} lang={lang} />
+        <About t={t} lang={lang} />
+        <Method t={t} lang={lang} />
+        <Transforms t={t} lang={lang} />
+        <Testimonials t={t} lang={lang} />
+        <Pricing t={t} lang={lang} />
+        <Payment t={t} lang={lang} />
         <Contact t={t} />
         <MarqueeCTA />
       </main>

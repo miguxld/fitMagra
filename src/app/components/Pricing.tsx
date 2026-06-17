@@ -3,9 +3,10 @@
 import { useState, useRef, useCallback } from "react";
 import { useScrollReveal } from "@/app/hooks/useScrollReveal";
 import {
-  plans,
+  getPlans,
   TERMS,
   type TermKey,
+  type Lang,
   fmtCOP,
   fmtUSD,
   USD_RATE,
@@ -14,14 +15,16 @@ import Reveal from "./Reveal";
 
 interface PricingProps {
   t: (key: string) => string;
+  lang: Lang;
 }
 
-export default function Pricing({ t }: PricingProps) {
+export default function Pricing({ t, lang }: PricingProps) {
   const [currency, setCurrency] = useState<"cop" | "usd">("cop");
   const [term, setTerm] = useState<TermKey>("1m");
   const [activePlan, setActivePlan] = useState("elite");
 
   const headRef = useScrollReveal();
+  const plans = getPlans(lang);
 
   const fmt = currency === "cop" ? fmtCOP : fmtUSD;
   const suffix = currency === "cop" ? "COP" : "USD";
@@ -91,16 +94,13 @@ export default function Pricing({ t }: PricingProps) {
       </div>
 
       <div className="max-w-[1240px] mx-auto relative z-10">
-
         {/* ── Header ── */}
         <div ref={headRef} className="reveal text-center mb-10 md:mb-14">
-          <div className="inline-flex items-center gap-2 text-[0.7rem] tracking-[0.22em] uppercase text-[var(--color-accent)] font-medium mb-4">
-            <span className="w-[18px] h-[1px] bg-[var(--color-accent)] inline-block" />
+          <div className="section-label mb-4">
             {t("pricing.label")}
-            <span className="w-[18px] h-[1px] bg-[var(--color-accent)] inline-block" />
           </div>
           <h2
-            className="font-[family-name:var(--font-display)] text-[clamp(2rem,5vw,3.6rem)] font-medium leading-[1.1] tracking-tight text-[var(--color-text-primary)] mb-4"
+            className="font-display text-[clamp(2rem,5vw,3.6rem)] font-medium leading-[1.1] tracking-tight text-[var(--color-text-primary)] mb-4"
             dangerouslySetInnerHTML={{ __html: t("pricing.title") }}
           />
           <p className="text-[0.95rem] leading-relaxed text-[var(--color-text-secondary)] max-w-[560px] mx-auto">
@@ -145,7 +145,7 @@ export default function Pricing({ t }: PricingProps) {
           </div>
           {currency === "usd" && (
             <div className="text-[0.65rem] text-[var(--color-text-muted)] tracking-wide animate-fade-in-up">
-              Conversión estimada: 1 USD = $4.000 COP (tasa referencial)
+              {lang === "es" ? "Conversión estimada: 1 USD = $4.000 COP (tasa referencial)" : "Estimated conversion: 1 USD = $4,000 COP (reference rate)"}
             </div>
           )}
 
@@ -153,7 +153,7 @@ export default function Pricing({ t }: PricingProps) {
           <div className="flex gap-2.5 flex-wrap justify-center mt-1">
             {(["1m", "2m", "3m"] as TermKey[]).map((k) => {
               const isOn = term === k;
-              const label = k === "1m" ? "1 mes" : k === "2m" ? "2 meses" : "3 meses";
+              const label = k === "1m" ? (lang === "es" ? "1 mes" : "1 month") : k === "2m" ? (lang === "es" ? "2 meses" : "2 months") : (lang === "es" ? "3 meses" : "3 months");
               const badge = k === "2m" ? "−10% 🔥" : k === "3m" ? "−15% ⚡" : null;
               return (
                 <button
@@ -208,7 +208,7 @@ export default function Pricing({ t }: PricingProps) {
                   {plan.name}
                   {plan.featured && (
                     <span className="block text-[0.56rem] font-normal mt-0.5 opacity-80">
-                      ⭐ Popular
+                      ⭐ {lang === "es" ? "Popular" : "Popular"}
                     </span>
                   )}
                 </button>
@@ -233,14 +233,14 @@ export default function Pricing({ t }: PricingProps) {
                 >
                   {plan.featured && (
                     <div className="self-start mb-3 bg-[var(--color-accent)] text-[var(--color-bg)] font-bold text-[0.66rem] tracking-[0.14em] uppercase px-3.5 py-1.5 rounded-full shadow-[0_4px_14px_rgba(126,217,87,0.4)]">
-                      ⭐ Más popular
+                      ⭐ {lang === "es" ? "Más popular" : "Most popular"}
                     </div>
                   )}
 
-                  <div className="font-[family-name:var(--font-display)] text-[1.8rem] font-medium text-[var(--color-text-primary)] leading-[1.1] tracking-tight mb-1">
+                  <div className="font-display text-[1.8rem] font-medium text-[var(--color-text-primary)] leading-[1.1] tracking-tight mb-1">
                     {plan.name}
                   </div>
-                  <div className="font-[family-name:var(--font-display)] italic text-[0.95rem] text-[var(--color-accent)] leading-snug mb-3 tracking-tight">
+                  <div className="font-display italic text-[0.95rem] text-[var(--color-accent)] leading-snug mb-3 tracking-tight">
                     {plan.headline}
                   </div>
                   <p className="text-[0.84rem] text-[var(--color-text-secondary)] leading-relaxed mb-5">
@@ -255,12 +255,12 @@ export default function Pricing({ t }: PricingProps) {
                           {fmt(total)}
                         </div>
                         <div className="absolute top-0 right-0 bg-[var(--color-accent)] text-[var(--color-bg)] font-bold text-[0.68rem] px-3 py-1.5 rounded-xl tracking-wide whitespace-nowrap shadow-[0_6px_18px_rgba(126,217,87,0.45)] rotate-[4deg]">
-                          Ahorras {fmt(savings)}
+                          {lang === "es" ? "Ahorras " : "Save "}{fmt(savings)}
                         </div>
                       </>
                     )}
                     <div
-                      className={`font-[family-name:var(--font-display)] text-[2.6rem] font-semibold leading-none tracking-tight ${
+                      className={`font-display text-[2.6rem] font-semibold leading-none tracking-tight ${
                         hasDiscount ? "text-[var(--color-accent)]" : "text-[var(--color-text-primary)]"
                       }`}
                     >
@@ -268,8 +268,8 @@ export default function Pricing({ t }: PricingProps) {
                     </div>
                     <div className="text-[0.75rem] text-[var(--color-text-muted)] mt-2 tracking-wide">
                       {hasDiscount
-                        ? `${suffix} · ${termData.months} meses · pago único`
-                        : `${suffix} · por mes · 30 días`}
+                        ? `${suffix} · ${termData.months} ${lang === "es" ? "meses" : "months"} · ${lang === "es" ? "pago único" : "single payment"}`
+                        : `${suffix} · ${lang === "es" ? "por mes" : "per month"} · 30 ${lang === "es" ? "días" : "days"}`}
                     </div>
                   </div>
 
@@ -278,12 +278,17 @@ export default function Pricing({ t }: PricingProps) {
                     {plan.features.map((feat, fi) => {
                       const isSubItem =
                         feat.startsWith("Drenaje") ||
+                        feat.startsWith("Lymphatic") ||
                         feat.startsWith("Reset") ||
                         feat.startsWith('"Clean') ||
                         feat.startsWith("Por tipo") ||
+                        feat.startsWith("By blood") ||
                         feat.startsWith("Por perfil") ||
+                        feat.startsWith("By nutraceutical") ||
                         feat.startsWith("Por biodecomposición") ||
-                        feat.startsWith("Por ritmos");
+                        feat.startsWith("By genetic") ||
+                        feat.startsWith("Por ritmos") ||
+                        feat.startsWith("By circadian");
                       return (
                         <li
                           key={fi}
@@ -338,7 +343,7 @@ export default function Pricing({ t }: PricingProps) {
             ))}
           </div>
           <p className="text-center text-[0.65rem] text-[var(--color-text-muted)] mt-3 tracking-wide">
-            Desliza para cambiar de plan
+            {lang === "es" ? "Desliza para cambiar de plan" : "Swipe to change plan"}
           </p>
         </div>
 
@@ -372,17 +377,17 @@ export default function Pricing({ t }: PricingProps) {
                 >
                   {plan.featured && isActive && (
                     <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-[var(--color-accent)] text-[var(--color-bg)] font-bold text-[0.68rem] tracking-[0.14em] uppercase px-4 py-1.5 rounded-full whitespace-nowrap shadow-[0_4px_16px_rgba(126,217,87,0.4)]">
-                      ⭐ Más popular
+                      ⭐ {lang === "es" ? "Más popular" : "Most popular"}
                     </div>
                   )}
 
-                  <div className="font-[family-name:var(--font-body)] text-[0.62rem] tracking-[0.24em] uppercase text-[rgba(126,217,87,0.65)] font-semibold mb-1">
+                  <div className="text-[0.62rem] tracking-[0.24em] uppercase text-[rgba(126,217,87,0.65)] font-semibold mb-1">
                     {plan.name}
                   </div>
-                  <div className="font-[family-name:var(--font-display)] text-[1.9rem] font-medium text-[var(--color-text-primary)] leading-[1.1] tracking-tight mb-2">
+                  <div className="font-display text-[1.9rem] font-medium text-[var(--color-text-primary)] leading-[1.1] tracking-tight mb-2">
                     {plan.name}
                   </div>
-                  <div className="font-[family-name:var(--font-display)] italic text-[1.0rem] text-[var(--color-accent)] leading-snug mb-3 tracking-tight">
+                  <div className="font-display italic text-[1.0rem] text-[var(--color-accent)] leading-snug mb-3 tracking-tight">
                     {plan.headline}
                   </div>
                   <p className="text-[0.84rem] text-[var(--color-text-secondary)] leading-relaxed mb-6">
@@ -396,12 +401,12 @@ export default function Pricing({ t }: PricingProps) {
                           {fmt(total)}
                         </div>
                         <div className="absolute -top-3 -right-3 bg-[var(--color-accent)] text-[var(--color-bg)] font-bold text-[0.68rem] px-3 py-1.5 rounded-[10px] tracking-wide whitespace-nowrap shadow-[0_6px_18px_rgba(126,217,87,0.5)] z-10 rotate-[7deg] animate-[savings-pop_0.5s_cubic-bezier(0.34,1.56,0.64,1)]">
-                          Ahorras {fmt(savings)}
+                          {lang === "es" ? "Ahorras " : "Save "}{fmt(savings)}
                         </div>
                       </>
                     )}
                     <div
-                      className={`font-[family-name:var(--font-display)] text-[3rem] font-semibold leading-none tracking-tight ${
+                      className={`font-display text-[3rem] font-semibold leading-none tracking-tight ${
                         hasDiscount ? "text-[var(--color-accent)]" : "text-[var(--color-text-primary)]"
                       }`}
                     >
@@ -409,8 +414,8 @@ export default function Pricing({ t }: PricingProps) {
                     </div>
                     <div className="text-[0.76rem] text-[var(--color-text-muted)] mt-2 tracking-wide">
                       {hasDiscount
-                        ? `${suffix} · ${termData.months} meses · pago único`
-                        : `${suffix} · por mes · 30 días`}
+                        ? `${suffix} · ${termData.months} ${lang === "es" ? "meses" : "months"} · ${lang === "es" ? "pago único" : "single payment"}`
+                        : `${suffix} · ${lang === "es" ? "por mes" : "per month"} · 30 ${lang === "es" ? "días" : "days"}`}
                     </div>
                   </div>
 
@@ -420,12 +425,17 @@ export default function Pricing({ t }: PricingProps) {
                     {plan.features.map((feat, fi) => {
                       const isSubItem =
                         feat.startsWith("Drenaje") ||
+                        feat.startsWith("Lymphatic") ||
                         feat.startsWith("Reset") ||
                         feat.startsWith('"Clean') ||
                         feat.startsWith("Por tipo") ||
+                        feat.startsWith("By blood") ||
                         feat.startsWith("Por perfil") ||
+                        feat.startsWith("By nutraceutical") ||
                         feat.startsWith("Por biodecomposición") ||
-                        feat.startsWith("Por ritmos");
+                        feat.startsWith("By genetic") ||
+                        feat.startsWith("Por ritmos") ||
+                        feat.startsWith("By circadian");
                       return (
                         <li
                           key={fi}
@@ -482,7 +492,7 @@ export default function Pricing({ t }: PricingProps) {
             ))}
           </div>
           <p className="text-center text-[0.65rem] text-[var(--color-text-muted)] mt-3 tracking-wide">
-            Clic en las cards laterales para navegar
+            {lang === "es" ? "Clic en las cards laterales para navegar" : "Click side cards to navigate"}
           </p>
         </div>
 

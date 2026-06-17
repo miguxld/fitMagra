@@ -2,18 +2,21 @@
 
 import { useState, useRef, useCallback } from "react";
 import { useScrollReveal } from "@/app/hooks/useScrollReveal";
-import { testimonials } from "@/app/lib/data";
+import { getTestimonials, type Lang } from "@/app/lib/data";
 
 interface TestimonialsProps {
   t: (key: string) => string;
+  lang: Lang;
 }
 
-export default function Testimonials({ t }: TestimonialsProps) {
+export default function Testimonials({ t, lang }: TestimonialsProps) {
   const headRef = useScrollReveal();
   const [active, setActive] = useState(0);
   const [playing, setPlaying] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const touchStartX = useRef<number | null>(null);
+
+  const testimonials = getTestimonials(lang);
 
   const handlePlay = () => {
     const vid = videoRef.current;
@@ -30,8 +33,8 @@ export default function Testimonials({ t }: TestimonialsProps) {
     }
   };
 
-  const prev = useCallback(() => setActive((a) => (a - 1 + testimonials.length) % testimonials.length), []);
-  const next = useCallback(() => setActive((a) => (a + 1) % testimonials.length), []);
+  const prev = useCallback(() => setActive((a) => (a - 1 + testimonials.length) % testimonials.length), [testimonials.length]);
+  const next = useCallback(() => setActive((a) => (a + 1) % testimonials.length), [testimonials.length]);
 
   const handleTouchStart = (e: React.TouchEvent) => { touchStartX.current = e.touches[0].clientX; };
   const handleTouchEnd = (e: React.TouchEvent) => {
@@ -138,13 +141,13 @@ export default function Testimonials({ t }: TestimonialsProps) {
             <div className="p-5 flex-1">
               <div className="text-[var(--color-star)] text-[0.78rem] tracking-widest mb-2">★★★★★</div>
               <p className="text-[0.8rem] text-[var(--color-text-secondary)] leading-relaxed">
-                Testimonio en video — experiencia real con FitMagra Systems.
+                {lang === "es" ? "Testimonio en video — experiencia real con FitMagra Systems." : "Video testimonial — real experience with FitMagra Systems."}
               </p>
               <div className="flex items-center gap-2.5 mt-4">
                 <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[var(--color-accent)] to-[var(--color-accent-hover)] flex items-center justify-center text-[0.72rem] font-bold text-[var(--color-bg)] flex-shrink-0">CL</div>
                 <div>
                   <div className="text-[0.8rem] font-semibold text-[var(--color-text-primary)]">Asesorada FitMagra</div>
-                  <div className="text-[0.64rem] text-[var(--color-text-muted)]">Video testimonial · transformación real</div>
+                  <div className="text-[0.64rem] text-[var(--color-text-muted)]">{lang === "es" ? "Video testimonial · transformación real" : "Video testimonial · real transformation"}</div>
                 </div>
               </div>
             </div>

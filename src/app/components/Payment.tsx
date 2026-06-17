@@ -2,25 +2,29 @@
 
 import { useState } from "react";
 import { useScrollReveal } from "@/app/hooks/useScrollReveal";
-import { paymentMethodsCO, paymentMethodsInt, steps } from "@/app/lib/data";
+import { getPaymentMethodsCO, getPaymentMethodsInt, getSteps, type Lang } from "@/app/lib/data";
 
 interface PaymentProps {
   t: (key: string) => string;
+  lang: Lang;
 }
 
-export default function Payment({ t }: PaymentProps) {
+export default function Payment({ t, lang }: PaymentProps) {
   const [tab, setTab] = useState<"co" | "int" | "how">("co");
   const ref = useScrollReveal();
+
+  const paymentMethodsCO = getPaymentMethodsCO(lang);
+  const paymentMethodsInt = getPaymentMethodsInt(lang);
+  const steps = getSteps(lang);
 
   return (
     <div id="payment" className="bg-[var(--color-surface)] text-[var(--color-text-primary)] rounded-[var(--radius-lg)] mx-5 md:mx-10 lg:mx-20 my-8 py-16 md:py-20 px-6 md:px-10 lg:px-16">
       <div ref={ref} className="reveal max-w-[1240px] mx-auto">
-        <div className="inline-flex items-center gap-2 text-[0.65rem] tracking-[0.22em] uppercase text-[var(--color-text-muted)] mb-3">
-          <span className="w-[18px] h-[1px] bg-[var(--color-accent)] inline-block" />
+        <div className="section-label mb-4">
           {t("pay.label")}
         </div>
         <h2
-          className="font-[family-name:var(--font-display)] text-[clamp(2rem,4vw,3.2rem)] font-bold leading-[1.1] tracking-tight text-[var(--color-text-primary)] mb-5"
+          className="font-display text-[clamp(2rem,4vw,3.2rem)] font-medium leading-[1.1] tracking-tight text-[var(--color-text-primary)] mb-5"
           dangerouslySetInnerHTML={{ __html: t("pay.title") }}
         />
         <div className="w-12 h-0.5 bg-[var(--color-accent)] rounded-full mb-6" />
@@ -28,8 +32,8 @@ export default function Payment({ t }: PaymentProps) {
         <div className="flex gap-2 flex-wrap mb-8">
           {[
             { key: "co" as const, label: "Colombia" },
-            { key: "int" as const, label: "Internacional" },
-            { key: "how" as const, label: "¿Cómo funciona?" },
+            { key: "int" as const, label: lang === "es" ? "Internacional" : "International" },
+            { key: "how" as const, label: lang === "es" ? "¿Cómo funciona?" : "How does it work?" },
           ].map((b) => (
             <button
               key={b.key}
@@ -115,7 +119,7 @@ export default function Payment({ t }: PaymentProps) {
               ))}
             </div>
             <p className="mt-5 text-[0.72rem] text-[var(--color-text-muted)] leading-relaxed">
-              Valor libre de comisiones. Envía comprobante a Fitmagrasystems@gmail.com o WhatsApp +57 316 5754416.
+              {lang === "es" ? "Valor libre de comisiones. Envía comprobante a Fitmagrasystems@gmail.com o WhatsApp +57 316 5754416." : "Commission-free value. Send receipt to Fitmagrasystems@gmail.com or WhatsApp +57 316 5754416."}
             </p>
           </div>
         )}
@@ -125,9 +129,9 @@ export default function Payment({ t }: PaymentProps) {
             {steps.map((step) => (
               <div
                 key={step.num}
-                className="p-5 rounded-[var(--radius-md)] bg-[var(--color-card-bg)] border border-[var(--color-card-border)]"
+                className="p-5 rounded-[var(--radius-md)] bg-[var(--color-card-bg)] border border-[var(--color-card-border)] hover:border-[var(--color-accent)] transition-all duration-300"
               >
-                <div className="font-mono text-[0.78rem] mb-3 tracking-wider inline-block bg-[var(--color-accent)] text-[var(--color-bg)] px-2 py-1 rounded-lg font-bold">
+                <div className="font-display text-[0.78rem] mb-3 tracking-wider inline-block bg-[var(--color-accent)] text-[var(--color-bg)] px-2 py-1 rounded-lg font-medium">
                   {step.num}
                 </div>
                 <div className="text-[0.78rem] font-medium text-[var(--color-text-primary)] mb-1">
