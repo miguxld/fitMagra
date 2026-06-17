@@ -21,7 +21,7 @@ function Counter({ target, suffix = "" }: { target: number; suffix?: string }) {
         entries.forEach((entry) => {
           if (entry.isIntersecting && !started.current) {
             started.current = true;
-            const dur = 1400;
+            const dur = 1600;
             const start = performance.now();
             const tick = (now: number) => {
               const t = Math.min(1, (now - start) / dur);
@@ -35,7 +35,7 @@ function Counter({ target, suffix = "" }: { target: number; suffix?: string }) {
           }
         });
       },
-      { threshold: 0.4 }
+      { threshold: 0.3 }
     );
     observer.observe(el);
     return () => observer.disconnect();
@@ -52,43 +52,84 @@ function Counter({ target, suffix = "" }: { target: number; suffix?: string }) {
 export default function Stats({ t }: StatsProps) {
   const headRef = useScrollReveal();
 
+  const stats = [
+    {
+      target: 450, suffix: "+", label: "Clientes",
+      desc: "Asesorados con protocolo doctoral — desde post-operatorios hasta atletas de élite.",
+      icon: (
+        <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+          <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2M9 11a4 4 0 100-8 4 4 0 000 8zM23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" />
+        </svg>
+      ),
+    },
+    {
+      target: 14, suffix: "", label: "Países",
+      desc: "Colombia, México, USA, España, Argentina, Chile, Ecuador y más.",
+      icon: (
+        <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+          <circle cx="12" cy="12" r="10" /><path d="M2 12h20M12 2a15.3 15.3 0 010 20M12 2a15.3 15.3 0 000 20" />
+        </svg>
+      ),
+    },
+    {
+      target: 8, suffix: "+", label: "Años",
+      desc: "Bioquímica + nutrición clínica + entrenamiento periodizado de élite.",
+      icon: (
+        <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+        </svg>
+      ),
+    },
+    {
+      target: 4, suffix: "", label: "Ecuaciones TMB",
+      desc: "Harris-Benedict, Mifflin-St Jeor, Cunningham y Oxford — cruce científico real.",
+      icon: (
+        <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+          <path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+        </svg>
+      ),
+    },
+  ];
+
   return (
-    <section id="stats" className="py-20 md:py-24 px-5 md:px-10 lg:px-20 max-w-[calc(1240px+160px)] mx-auto">
-      <div ref={headRef} className="reveal mb-12 max-w-[680px]">
-        <div className="inline-flex items-center gap-2 text-[0.65rem] tracking-[0.22em] uppercase text-[var(--color-text-muted)] mb-3">
-          <span className="w-[18px] h-[1px] bg-[var(--color-accent)] inline-block" />
-          {t("stats.label")}
-        </div>
+    <section
+      id="stats"
+      className="py-20 md:py-24 px-5 md:px-10 lg:px-20 max-w-[calc(1240px+160px)] mx-auto"
+    >
+      <div ref={headRef} className="reveal mb-14 max-w-[620px]">
+        <div className="section-label mb-4">{t("stats.label")}</div>
         <h2
-          className="font-[family-name:var(--font-display)] text-[clamp(2rem,4.2vw,3.3rem)] font-bold leading-[1.05] tracking-tight"
+          className="font-display text-[clamp(1.9rem,4.2vw,3.2rem)] font-medium leading-[1.05] tracking-tight"
           dangerouslySetInnerHTML={{ __html: t("stats.title") }}
         />
       </div>
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 border-t border-b border-[var(--color-card-border)]">
-        {[
-          { target: 450, suffix: "+", label: "Clientes", desc: "Asesorados con protocolo doctoral, desde post-operatorios hasta atletas de élite." },
-          { target: 14, suffix: "", label: "Países", desc: "Colombia, México, USA, España, Argentina, Chile, Ecuador y más." },
-          { target: 8, suffix: "+", label: "Años de coaching", desc: "Más de 8 años aplicando bioquímica + nutrición clínica + entrenamiento periodizado." },
-          { target: 4, suffix: "", label: "Ecuaciones TMB", desc: "Harris-Benedict, Mifflin-St Jeor, Cunningham y Oxford — cruce científico." },
-        ].map((stat, i) => (
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-px bg-[var(--color-card-border)] rounded-[var(--radius-lg)] overflow-hidden">
+        {stats.map((stat, i) => (
           <Reveal
             key={stat.label}
             delay={((i % 4) + 1) as 1 | 2 | 3 | 4}
-            className={`p-8 lg:p-9 relative group border-r border-[var(--color-card-border)] last:border-r-0 ${
-              i < 2 ? "border-b lg:border-b-0" : ""
-            }`}
+            className="bg-[var(--color-surface)] p-8 lg:p-9 relative group cursor-default"
           >
-            <div className="font-[family-name:var(--font-display)] text-[clamp(3rem,6vw,4.5rem)] font-normal leading-none tracking-tight text-[var(--color-text-primary)] transition-transform group-hover:scale-105">
+            {/* Icon */}
+            <div className="text-[var(--color-accent)] opacity-60 mb-5 group-hover:opacity-100 transition-opacity duration-300">
+              {stat.icon}
+            </div>
+
+            {/* Number */}
+            <div className="font-display text-[clamp(3rem,6vw,4.5rem)] font-medium leading-none tracking-tight text-[var(--color-text-primary)] mb-3 transition-transform duration-300 group-hover:scale-105 origin-left">
               <Counter target={stat.target} suffix={stat.suffix} />
             </div>
-            <div className="text-[0.72rem] tracking-[0.12em] uppercase text-[var(--color-text-muted)] mt-4 font-medium">
+
+            <div className="text-[0.7rem] font-semibold tracking-[.14em] uppercase text-[var(--color-accent)] mb-2">
               {stat.label}
             </div>
-            <div className="text-[0.78rem] text-[var(--color-text-secondary)] mt-2 leading-relaxed">
+            <div className="text-[0.78rem] text-[var(--color-text-secondary)] leading-relaxed">
               {stat.desc}
             </div>
-            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-0.5 bg-[var(--color-accent)] transition-all duration-[350ms] ease-[cubic-bezier(0.4,0,0.2,1)] group-hover:w-[60%]" />
+
+            {/* Bottom accent line on hover */}
+            <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-[var(--color-accent)] to-transparent scale-x-0 group-hover:scale-x-100 transition-transform duration-[400ms] origin-left" />
           </Reveal>
         ))}
       </div>

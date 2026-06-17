@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { type Lang, t as translate } from "@/app/lib/data";
 
 function getInitialLang(): Lang {
@@ -8,6 +8,9 @@ function getInitialLang(): Lang {
   try {
     const saved = localStorage.getItem("fitmagra-lang") as Lang;
     if (saved === "es" || saved === "en") return saved;
+    // Try browser preference
+    const browserLang = navigator.language?.slice(0, 2).toLowerCase();
+    if (browserLang === "en") return "en";
   } catch {}
   return "es";
 }
@@ -15,8 +18,14 @@ function getInitialLang(): Lang {
 export function useLanguage() {
   const [lang, setLangState] = useState<Lang>(getInitialLang);
 
+  // Sync html[lang] attribute whenever language changes
+  useEffect(() => {
+    document.documentElement.lang = lang;
+  }, [lang]);
+
   const setLang = useCallback((l: Lang) => {
     setLangState(l);
+    document.documentElement.lang = l;
     try {
       localStorage.setItem("fitmagra-lang", l);
     } catch {}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useCallback } from "react";
 import { useScrollReveal } from "@/app/hooks/useScrollReveal";
 import { testimonials } from "@/app/lib/data";
 
@@ -10,9 +10,10 @@ interface TestimonialsProps {
 
 export default function Testimonials({ t }: TestimonialsProps) {
   const headRef = useScrollReveal();
-  const gridRef = useScrollReveal();
+  const [active, setActive] = useState(0);
   const [playing, setPlaying] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const touchStartX = useRef<number | null>(null);
 
   const handlePlay = () => {
     const vid = videoRef.current;
@@ -29,138 +30,163 @@ export default function Testimonials({ t }: TestimonialsProps) {
     }
   };
 
-  const handleFullscreen = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    const vid = videoRef.current;
-    if (!vid) return;
-    const el = vid as HTMLVideoElement & {
-      webkitRequestFullscreen?: () => void;
-      webkitEnterFullscreen?: () => void;
-    };
-    if (el.requestFullscreen) el.requestFullscreen();
-    else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
-    else if (el.webkitEnterFullscreen) el.webkitEnterFullscreen();
+  const prev = useCallback(() => setActive((a) => (a - 1 + testimonials.length) % testimonials.length), []);
+  const next = useCallback(() => setActive((a) => (a + 1) % testimonials.length), []);
+
+  const handleTouchStart = (e: React.TouchEvent) => { touchStartX.current = e.touches[0].clientX; };
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartX.current === null) return;
+    const dx = e.changedTouches[0].clientX - touchStartX.current;
+    if (Math.abs(dx) > 40) dx < 0 ? next() : prev();
+    touchStartX.current = null;
   };
 
   return (
-    <section id="testi" className="py-20 md:py-24 px-5 md:px-10 lg:px-20 bg-[var(--color-surface)]">
-      <div className="max-w-[1240px] mx-auto">
-        <div ref={headRef} className="reveal">
-          <div className="inline-flex items-center gap-2 text-[0.65rem] tracking-[0.22em] uppercase text-[var(--color-text-muted)] mb-3">
-            <span className="w-[18px] h-[1px] bg-[var(--color-accent)] inline-block" />
-            {t("testi.label")}
+    <section id="testi" className="py-20 md:py-28 px-5 md:px-10 lg:px-20 bg-[var(--color-surface)]">
+      <div className="max-w-[1200px] mx-auto">
+        <div ref={headRef} className="reveal flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-12">
+          <div>
+            <div className="section-label mb-4">{t("testi.label")}</div>
+            <h2
+              className="font-display text-[clamp(1.9rem,4vw,3.1rem)] font-medium leading-[1.1] tracking-tight"
+              dangerouslySetInnerHTML={{ __html: t("testi.title") }}
+            />
           </div>
-          <h2
-            className="font-[family-name:var(--font-display)] text-[clamp(2rem,4vw,3.2rem)] font-bold leading-[1.1] tracking-tight"
-            dangerouslySetInnerHTML={{ __html: t("testi.title") }}
-          />
-          <div className="w-12 h-0.5 bg-[var(--color-accent)] rounded-full mt-4 mb-10" />
+          {/* Navigation arrows */}
+          <div className="flex items-center gap-2.5 flex-shrink-0">
+            <button
+              onClick={prev}
+              className="w-10 h-10 rounded-full border border-[var(--color-card-border)] bg-[var(--color-card-bg)] text-[var(--color-text-muted)] flex items-center justify-center cursor-pointer transition-all hover:border-[var(--color-accent)] hover:text-[var(--color-accent)] hover:-translate-y-0.5 p-0"
+              aria-label="Testimonio anterior"
+            >
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                <path d="M10 3L5 8l5 5" />
+              </svg>
+            </button>
+            <span className="text-[0.72rem] text-[var(--color-text-muted)] font-medium min-w-[36px] text-center">
+              {active + 1}/{testimonials.length}
+            </span>
+            <button
+              onClick={next}
+              className="w-10 h-10 rounded-full border border-[var(--color-card-border)] bg-[var(--color-card-bg)] text-[var(--color-text-muted)] flex items-center justify-center cursor-pointer transition-all hover:border-[var(--color-accent)] hover:text-[var(--color-accent)] hover:-translate-y-0.5 p-0"
+              aria-label="Siguiente testimonio"
+            >
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                <path d="M6 3l5 5-5 5" />
+              </svg>
+            </button>
+          </div>
         </div>
 
-        <div ref={gridRef} className="reveal grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {/* ── Desktop: 3-col grid ── */}
+        <div className="hidden md:grid grid-cols-2 lg:grid-cols-3 gap-4">
           {testimonials.map((item, i) => (
             <div
               key={i}
-              className="bg-[var(--color-card-bg)] rounded-[var(--radius-md)] p-7 relative border border-[var(--color-card-border)] transition-all hover:-translate-y-1 hover:border-[var(--color-accent)]"
+              className="bg-[var(--color-card-bg)] rounded-[var(--radius-md)] p-6 relative border border-[var(--color-card-border)] transition-all duration-300 hover:-translate-y-1 hover:border-[var(--color-accent)] hover:shadow-[0_8px_32px_rgba(0,0,0,.3)] group"
             >
-              <span className="absolute top-2 right-5 font-[family-name:var(--font-display)] text-[4rem] text-[var(--color-accent)] opacity-15 leading-none select-none">
+              {/* Quote mark */}
+              <span className="absolute top-4 right-5 font-display text-[3.5rem] text-[var(--color-accent)] opacity-10 leading-none select-none group-hover:opacity-20 transition-opacity">
                 &ldquo;
               </span>
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-[42px] h-[42px] rounded-full bg-[var(--color-accent)] flex items-center justify-center text-[0.82rem] font-medium text-white flex-shrink-0">
+
+              {/* Stars */}
+              <div className="text-[var(--color-star)] text-[0.78rem] tracking-widest mb-4">★★★★★</div>
+
+              {/* Text */}
+              <p className="text-[0.84rem] leading-[1.75] text-[var(--color-text-secondary)] mb-5 relative z-10">
+                {item.text}
+              </p>
+
+              {/* Author */}
+              <div className="flex items-center gap-3 border-t border-[var(--color-card-border)] pt-4">
+                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[var(--color-accent)] to-[var(--color-accent-hover)] flex items-center justify-center text-[0.75rem] font-bold text-[var(--color-bg)] flex-shrink-0">
                   {item.initials}
                 </div>
                 <div>
-                  <div className="text-[0.82rem] font-medium text-[var(--color-text-primary)]">
-                    {item.name}
-                  </div>
-                  <div className="text-[0.66rem] text-[var(--color-text-muted)]">
-                    {item.role}
-                  </div>
+                  <div className="text-[0.82rem] font-semibold text-[var(--color-text-primary)]">{item.name}</div>
+                  <div className="text-[0.66rem] text-[var(--color-text-muted)]">{item.role}</div>
                 </div>
               </div>
-              <div className="text-[var(--color-star)] text-[0.72rem] tracking-widest mb-3">
-                ★★★★★
-              </div>
-              <p className="text-[0.83rem] leading-[1.7] text-[var(--color-text-secondary)]">
-                {item.text}
-              </p>
             </div>
           ))}
 
-          {/* Video testimonial */}
-          <div
-            className="bg-[var(--color-card-bg)] rounded-[var(--radius-md)] relative border border-[var(--color-card-border)] transition-all overflow-hidden flex flex-col"
-          >
+          {/* Video testimonial card */}
+          <div className="bg-[var(--color-card-bg)] rounded-[var(--radius-md)] border border-[var(--color-card-border)] overflow-hidden flex flex-col transition-all duration-300 hover:border-[var(--color-accent)]">
             <div
-              className={`relative w-full overflow-hidden bg-black cursor-pointer ${
-                playing ? "aspect-video max-h-[45vh]" : "aspect-[4/3]"
-              }`}
+              className={`relative w-full overflow-hidden bg-black cursor-pointer flex-shrink-0 ${playing ? "aspect-video" : "aspect-[4/3]"}`}
               onClick={handlePlay}
-              tabIndex={0}
               role="button"
+              tabIndex={0}
               aria-label="Reproducir video testimonial"
-              onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === " ") {
-                  e.preventDefault();
-                  handlePlay();
-                }
-              }}
+              onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); handlePlay(); } }}
             >
               <video
                 ref={videoRef}
                 src="/testimonial-video.mp4"
-                muted
-                playsInline
-                preload="metadata"
-                className={`w-full h-full block bg-black ${
-                  playing ? "object-contain max-h-[45vh]" : "object-cover"
-                }`}
+                muted playsInline preload="metadata"
+                className={`w-full h-full block bg-black ${playing ? "object-contain" : "object-cover"}`}
               />
-              <div
-                className={`absolute inset-0 flex items-center justify-center transition-opacity ${
-                  playing ? "opacity-0 pointer-events-none" : "bg-black/15"
-                }`}
-              >
-                <svg width="48" height="48" viewBox="0 0 24 24">
-                  <circle cx="12" cy="12" r="12" fill="rgba(0,0,0,0.6)" />
-                  <polygon points="10,8 18,12 10,16" fill="white" />
-                </svg>
-              </div>
-              {playing && (
-                <button
-                  onClick={handleFullscreen}
-                  aria-label="Pantalla completa"
-                  className="absolute top-3 right-3 bg-black/55 border-none rounded-lg p-2 flex items-center justify-center z-10"
-                  title="Pantalla completa"
-                >
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
-                    <path d="M3 3h7v2H5v5H3V3zm11 0h7v7h-2V5h-5V3zM3 14h2v5h5v2H3v-7zm16 0h2v7h-7v-2h5v-5z" />
+              <div className={`absolute inset-0 flex items-center justify-center transition-opacity ${playing ? "opacity-0 pointer-events-none" : "bg-black/20"}`}>
+                <div className="w-14 h-14 rounded-full bg-[var(--color-accent)]/90 flex items-center justify-center shadow-[0_0_0_8px_rgba(126,217,87,.2)] transition-all hover:scale-110">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="var(--color-bg)">
+                    <polygon points="5,3 19,12 5,21" />
                   </svg>
-                </button>
-              )}
+                </div>
+              </div>
             </div>
-            <div className="p-5">
-              <div className="flex items-center gap-3 mb-2">
-                <div className="w-[42px] h-[42px] rounded-full bg-[var(--color-accent)] flex items-center justify-center text-[0.82rem] font-medium text-white flex-shrink-0">
-                  CL
-                </div>
-                <div>
-                  <div className="text-[0.82rem] font-medium text-[var(--color-text-primary)]">
-                    Asesorada FitMagra
-                  </div>
-                  <div className="text-[0.66rem] text-[var(--color-text-muted)]">
-                    Video testimonial · transformación real
-                  </div>
-                </div>
-              </div>
-              <div className="text-[#FFD27A] text-[0.72rem] tracking-widest mb-2">
-                ★★★★★
-              </div>
-              <p className="text-[0.83rem] leading-[1.7] text-[var(--color-text-secondary)]">
-                Toca para reproducir.
+            <div className="p-5 flex-1">
+              <div className="text-[var(--color-star)] text-[0.78rem] tracking-widest mb-2">★★★★★</div>
+              <p className="text-[0.8rem] text-[var(--color-text-secondary)] leading-relaxed">
+                Testimonio en video — experiencia real con FitMagra Systems.
               </p>
+              <div className="flex items-center gap-2.5 mt-4">
+                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[var(--color-accent)] to-[var(--color-accent-hover)] flex items-center justify-center text-[0.72rem] font-bold text-[var(--color-bg)] flex-shrink-0">CL</div>
+                <div>
+                  <div className="text-[0.8rem] font-semibold text-[var(--color-text-primary)]">Asesorada FitMagra</div>
+                  <div className="text-[0.64rem] text-[var(--color-text-muted)]">Video testimonial · transformación real</div>
+                </div>
+              </div>
             </div>
+          </div>
+        </div>
+
+        {/* ── Mobile: single card carousel ── */}
+        <div
+          className="md:hidden"
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd}
+        >
+          <div className="bg-[var(--color-card-bg)] rounded-[var(--radius-md)] p-6 border border-[var(--color-card-border)] animate-card-in" key={active}>
+            <div className="text-[var(--color-star)] text-[0.82rem] tracking-widest mb-4">★★★★★</div>
+            <p className="text-[0.88rem] leading-[1.75] text-[var(--color-text-secondary)] mb-5">
+              {testimonials[active].text}
+            </p>
+            <div className="flex items-center gap-3 border-t border-[var(--color-card-border)] pt-4">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[var(--color-accent)] to-[var(--color-accent-hover)] flex items-center justify-center text-[0.78rem] font-bold text-[var(--color-bg)] flex-shrink-0">
+                {testimonials[active].initials}
+              </div>
+              <div>
+                <div className="text-[0.86rem] font-semibold text-[var(--color-text-primary)]">{testimonials[active].name}</div>
+                <div className="text-[0.68rem] text-[var(--color-text-muted)]">{testimonials[active].role}</div>
+              </div>
+            </div>
+          </div>
+
+          {/* Dots */}
+          <div className="flex justify-center gap-2 mt-5">
+            {testimonials.map((_, i) => (
+              <button
+                key={i}
+                onClick={() => setActive(i)}
+                className={`rounded-full border-0 cursor-pointer transition-all duration-300 ${
+                  i === active
+                    ? "w-6 h-2 bg-[var(--color-accent)]"
+                    : "w-2 h-2 bg-[var(--color-card-border)] hover:bg-[var(--color-text-muted)]"
+                }`}
+                aria-label={`Ver testimonio ${i + 1}`}
+              />
+            ))}
           </div>
         </div>
       </div>
