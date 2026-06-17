@@ -52,7 +52,7 @@ function Counter({ target, suffix = "" }: { target: number; suffix?: string }) {
   );
 }
 
-export default function Stats({ t }: StatsProps) {
+export default function Stats({ t, lang }: StatsProps) {
   const headRef = useScrollReveal();
 
   const stats = [
