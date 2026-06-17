@@ -20,11 +20,12 @@ export default function Payment({ t, lang }: PaymentProps) {
   return (
     <div id="payment" className="bg-[var(--color-surface)] text-[var(--color-text-primary)] rounded-[var(--radius-lg)] mx-5 md:mx-10 lg:mx-20 my-8 py-16 md:py-20 px-6 md:px-10 lg:px-16">
       <div ref={ref} className="reveal max-w-[1240px] mx-auto">
-        <div className="section-label mb-4">
+        <div className="inline-flex items-center gap-2 text-[0.65rem] tracking-[0.22em] uppercase text-[var(--color-text-muted)] mb-3">
+          <span className="w-[18px] h-[1px] bg-[var(--color-accent)] inline-block" />
           {t("pay.label")}
         </div>
         <h2
-          className="font-display text-[clamp(2rem,4vw,3.2rem)] font-medium leading-[1.1] tracking-tight text-[var(--color-text-primary)] mb-5"
+          className="font-[family-name:var(--font-display)] text-[clamp(2rem,4vw,3.2rem)] font-bold leading-[1.1] tracking-tight text-[var(--color-text-primary)] mb-5"
           dangerouslySetInnerHTML={{ __html: t("pay.title") }}
         />
         <div className="w-12 h-0.5 bg-[var(--color-accent)] rounded-full mb-6" />
@@ -129,9 +130,9 @@ export default function Payment({ t, lang }: PaymentProps) {
             {steps.map((step) => (
               <div
                 key={step.num}
-                className="p-5 rounded-[var(--radius-md)] bg-[var(--color-card-bg)] border border-[var(--color-card-border)] hover:border-[var(--color-accent)] transition-all duration-300"
+                className="p-5 rounded-[var(--radius-md)] bg-[var(--color-card-bg)] border border-[var(--color-card-border)]"
               >
-                <div className="font-display text-[0.78rem] mb-3 tracking-wider inline-block bg-[var(--color-accent)] text-[var(--color-bg)] px-2 py-1 rounded-lg font-medium">
+                <div className="font-mono text-[0.78rem] mb-3 tracking-wider inline-block bg-[var(--color-accent)] text-[var(--color-bg)] px-2 py-1 rounded-lg font-bold">
                   {step.num}
                 </div>
                 <div className="text-[0.78rem] font-medium text-[var(--color-text-primary)] mb-1">
